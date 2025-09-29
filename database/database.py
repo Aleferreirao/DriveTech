@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "oficina.db"  # Nome do banco adaptado
+DB_NAME = "oficina.db"  # Nome do banco adaptado para projeto 
 
 def conectar():
     return sqlite3.connect(DB_NAME)
