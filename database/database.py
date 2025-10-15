@@ -1,85 +1,59 @@
-import mysql.connector
+import sqlite3
 
-#Dados do servidor MySQL
-HOST = "localhost"
-USER = "root"
-PASSWORD = "senac"
-DB_NAME = "escola_db" #nome do banco de dados
+DB_NAME = "DriveTech.db"
 
-def conectar(usando_banco=True):
-    """Conectar ao Mysql 
-    -usando_banco=True -> conectar direto ao schema DB_NAME
-    -usando_banco=False -> conectar sem definir um banco"""
-    if usando_banco:
-        return mysql.connector.connect(
-            host = HOST,
-            user = USER,
-            port = "3306",
-            password = PASSWORD,
-            database = DB_NAME
-        )
-    else:
-        return mysql.connector.connect(
-            host = HOST,
-            user = USER,
-            port="3306",
-            password = PASSWORD
-        ) 
-
-def criar_banco():
-    #Criar banco caso não exista
-    conn = conectar(usando_banco=False) #Cria uma instância de conexão com o banco
-    cursor = conn.cursor() # Aponta para o Banco de Dadosa
-    cursor.execute(""" CREATE DATABASE 
-                   IF NOT EXISTS {DB_NAME}""")
-    conn.commit() # salva as alterações no banco
-    conn.close() # fecha a conexão com o banco
-
+def conectar():
+    return sqlite3.connect(DB_NAME)
 
 def criar_tabelas():
-    #cria as tabelas (curso, turma, aluno) 
-    # se não existirem do BD
-    conn = conectar() # abre a conexão com o banco
-    cursor = conn.cursor() # cria um cursor que aponta pro BD e executa intruções SQL
+    con = conectar()
+    cur = con.cursor()
+
+
     
-    # Tabela de clientes
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS clientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            telefone TEXT,
-            email TEXT,
-            cpf TEXT UNIQUE
-        )
-    """)
+    cur.execute(""" 
+                    CREATE TABLE IF NOT EXISTS cliente(
+                        nme_cliente VARCHAR(100) NOT NULL,
+                        cpf_cliente VARCHAR(15) PRIMARY KEY NOT NULL,
+                        tel_cliente VARCHAR(15) NOT NULL,
+                        email_cliente VARCHAR(50) NOT NULL,
+                        end_cliente VARCHAR(50) NOT NULL
+                    )
+                 """)
 
-    # Tabela de veículos
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS veiculos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cliente_id INTEGER NOT NULL,
-            marca TEXT,
-            modelo TEXT,
-            ano INTEGER,
-            placa TEXT UNIQUE,
-            km_atual INTEGER,
-            FOREIGN KEY(cliente_id) REFERENCES clientes(id)
-        )
-    """)
+    cur.execute(""" 
+                    CREATE TABLE IF NOT EXISTS veiculo(
+                        id_veiculo INT PRIMARY KEY AUTO_INCREMENT,
+                        marc_veiculo VARCHAR(30) NOT NULL,
+                        mode_veiculo VARCHAR (100) NOT NULL,
+                        ano_veiculo DATE NOT NULL,
+                        placa_veiculo VARCHAR(30) NOT NULL,
+                        km_atual_veiculo INT NOT NULL,
+                        cpf_cliente_veiculo VARCHAR, FOREIGN KEY(cpf_cliente_veiculo) REFERENCES cliente(cpf_cliente)
+                    )
+                 """)
+    
+    cur.execute(""" 
+                    CREATE TABLE IF NOT EXISTS manutencao(
+                        id_manutencao INT PRIMARY KEY AUTO_INCREMENT,
+                        veic_manutencao VARCHAR(30) NOT NULL,
+                        serv_manutencao VARCHAR (100) NOT NULL,
+                        dta_manuntencao DATE NOT NULL,
+                        pecs_manutencao VARCHAR(30)
+                    )
+                 """)
+    
+    cur.execute(""" 
+                    CREATE TABLE IF NOT EXISTS relatorio(
+                        id INT PRIMARY KEY AUTO_INCREMENT,
+                        nome VARCHAR(100) NOT NULL,
+                        turma_id INT,
+                        FOREIGN KEY(turma_id) REFERENCES turmas(id)
+                    )
+                 """)
+    
+    #adicionar outras tabelas pendentes ainda acima, e configurar as que ja estão descritas
 
-    # Tabela de manutenções
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS manutencoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            veiculo_id INTEGER NOT NULL,
-            descricao TEXT NOT NULL,
-            data TEXT NOT NULL,
-            km_realizada INTEGER,
-            km_proxima INTEGER,
-            data_proxima TEXT,
-            FOREIGN KEY(veiculo_id) REFERENCES veiculos(id)
-        )
-    """)
 
-    conn.commit()
-    conn.close()
+    con.commit() #salva(confirmar) as alterações no banco
+    con.close() #fechar a conexão com o banco
