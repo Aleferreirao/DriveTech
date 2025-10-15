@@ -1,27 +1,22 @@
 # models.py
 import sqlite3
-from database import conectar
-
-# Classe base: Pessoa
-class Pessoa:
-    def __init__(self, nome, telefone=None, email=None, cpf=None):
+from database.database import conectar
+# Classe base: Cliente
+class Cliente:
+    def __init__(self, nome, cpf=None, telefone=None, email=None, endereço=None):
         self.nome = nome
+        self.cpf = cpf
         self.telefone = telefone
         self.email = email
-        self.cpf = cpf
+        self.endereço = endereço
 
-
-# Subclasse: Cliente
-class Cliente(Pessoa):
-    def __init__(self, nome, telefone=None, email=None, cpf=None):
-        super().__init__(nome, telefone, email, cpf)
 
     def adicionar(self):
         con = conectar()
         cur = con.cursor()
         cur.execute(
-            "INSERT INTO clientes (nome, telefone, email, cpf) VALUES (?, ?, ?, ?)",
-            (self.nome, self.telefone, self.email, self.cpf)
+            "INSERT INTO cliente (nome,cpf, telefone, email, endereço) VALUES (?, ?, ?, ?, ?)",
+            (self.nome,self.cpf, self.telefone, self.email, self.endereço)
         )
         con.commit()
         con.close()
@@ -30,36 +25,38 @@ class Cliente(Pessoa):
     def listar():
         con = conectar()
         cur = con.cursor()
-        cur.execute("SELECT * FROM clientes")
+        cur.execute("SELECT * FROM cliente")
         dados = cur.fetchall()
         con.close()
         return dados
 
     @staticmethod
-    def atualizar(cliente_id, nome=None, telefone=None, email=None):
+    def atualizar(cpf_cliente, nome=None, telefone=None, email=None, endereço=None):
         con = conectar()
         cur = con.cursor()
         if nome:
-            cur.execute("UPDATE clientes SET nome=? WHERE id=?", (nome, cliente_id))
+            cur.execute("UPDATE cliente SET nome=? WHERE id=?", (nome, cpf_cliente))
         if telefone:
-            cur.execute("UPDATE clientes SET telefone=? WHERE id=?", (telefone, cliente_id))
+            cur.execute("UPDATE cliente SET telefone=? WHERE id=?", (telefone, cpf_cliente))
         if email:
-            cur.execute("UPDATE clientes SET email=? WHERE id=?", (email, cliente_id))
+            cur.execute("UPDATE cliente SET email=? WHERE id=?", (email, cpf_cliente))
+        if endereço:
+            cur.execute("UPDATE cliente SET endereço=? WHERE id=?", (endereço, cpf_cliente))
         con.commit()
         con.close()
 
     @staticmethod
-    def deletar(cliente_id):
+    def deletar(cpf_cliente):
         con = conectar()
         cur = con.cursor()
-        cur.execute("DELETE FROM clientes WHERE id=?", (cliente_id,))
+        cur.execute("DELETE FROM cliente WHERE id=?", (cpf_cliente,))
         con.commit()
         con.close()
 
 # Classe: Veiculo
 class Veiculo:
-    def __init__(self, cliente_id, marca, modelo, ano, placa, km_atual=0):
-        self.cliente_id = cliente_id
+    def __init__(self, cpf_cliente, marca, modelo, ano, placa, km_atual=0):
+        self.cpf_cliente = cpf_cliente
         self.marca = marca
         self.modelo = modelo
         self.ano = ano
@@ -70,8 +67,8 @@ class Veiculo:
         con = conectar()
         cur = con.cursor()
         cur.execute(
-            "INSERT INTO veiculos (cliente_id, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
-            (self.cliente_id, self.marca, self.modelo, self.ano, self.placa, self.km_atual)
+            "INSERT INTO veiculo (cliente_id, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
+            (self.cpf_cliente, self.marca, self.modelo, self.ano, self.placa, self.km_atual)
         )
         con.commit()
         con.close()
@@ -80,15 +77,15 @@ class Veiculo:
     def listar():
         con = conectar()
         cur = con.cursor()
-        cur.execute("SELECT * FROM veiculos")
+        cur.execute("SELECT * FROM veiculo")
         dados = cur.fetchall()
         con.close()
         return dados
 
 # Classe: Manutencao
 class Manutencao:
-    def __init__(self, veiculo_id, descricao, data, km_realizada, km_proxima=None, data_proxima=None):
-        self.veiculo_id = veiculo_id
+    def __init__(self, cpf_cliente, descricao, data, km_realizada, km_proxima=None, data_proxima=None):
+        self.cpf_cliente = cpf_cliente
         self.descricao = descricao
         self.data = data
         self.km_realizada = km_realizada
@@ -100,7 +97,7 @@ class Manutencao:
         cur = con.cursor()
         cur.execute(
             "INSERT INTO manutencoes (veiculo_id, descricao, data, km_realizada, km_proxima, data_proxima) VALUES (?, ?, ?, ?, ?, ?)",
-            (self.veiculo_id, self.descricao, self.data, self.km_realizada, self.km_proxima, self.data_proxima)
+            (self.cpf_cliente, self.descricao, self.data, self.km_realizada, self.km_proxima, self.data_proxima)
         )
         con.commit()
         con.close()
