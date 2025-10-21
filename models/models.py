@@ -2,7 +2,11 @@
 import sqlite3
 from database.database import conectar
 # Classe base: Cliente
+<<<<<<< HEAD
 class Pessoa:
+=======
+class Cliente:
+>>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
     def __init__(self, nome, cpf=None, telefone=None, email=None, endereço=None):
         self.nome = nome
         self.cpf = cpf
@@ -10,11 +14,6 @@ class Pessoa:
         self.email = email
         self.endereço = endereço
 
-
-# Subclasse: Cliente
-class Cliente(Pessoa):
-    def __init__(self, nome, telefone=None, email=None, cpf=None):
-        super().__init__(nome, telefone, email, cpf)
 
     def adicionar(self):
         con = conectar()
@@ -72,7 +71,11 @@ class Veiculo:
         con = conectar()
         cur = con.cursor()
         cur.execute(
+<<<<<<< HEAD
             "INSERT INTO veiculo (cpf_cliente, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
+=======
+            "INSERT INTO veiculo (cliente_id, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
+>>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
             (self.cpf_cliente, self.marca, self.modelo, self.ano, self.placa, self.km_atual)
         )
         con.commit()
