@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import re
 
+
 # Dados simulados da oficina
 USUARIO_EMAIL = "oficina@drivetech.com"
 USUARIO_SENHA = "admin123"

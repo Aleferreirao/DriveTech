@@ -54,7 +54,7 @@ def restaurar_backup():
         messagebox.showerror("Erro", f"Erro ao restaurar backup:\n{e}")
 
 # === GUI ===
-root = tk.Tk()
+root = tk.frame()
 root.title("Gerenciamento de Backups")
 root.geometry("700x450")
 

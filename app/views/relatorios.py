@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 from datetime import datetime
-
+from Home import root 
 DB_NAME = "oficina.db"
 
 def conectar():
@@ -83,13 +83,14 @@ def exportar_relatorio():
     messagebox.showinfo("Exportado", "Relatório exportado para relatorios_gerados.txt")
 
 # ==== Interface ====
-root = tk.Tk()
-root.title("Relatórios")
-root.geometry("700x400")
+#root = tk.Tk() 
+#root.title("Relatórios")
+#root.geometry("700x400")
 
+Tela_Relatorios = tk.Frame(root)
 tk.Label(root, text="Relatórios", font=("Arial Black", 18)).pack(pady=10)
 
-frame_filtros = tk.Frame(root)
+frame_filtros = tk.Frame(Tela_Relatorios)
 frame_filtros.pack(pady=5)
 
 tk.Label(frame_filtros, text="Serviços realizados:").grid(row=0, column=0, padx=5)
@@ -102,12 +103,12 @@ entrada_data.grid(row=0, column=3, padx=5)
 
 tk.Button(frame_filtros, text="Gerar relatório", bg="black", fg="white", command=gerar_relatorio).grid(row=0, column=4, padx=10)
 
-tree = ttk.Treeview(root, columns=("Relatório",), show="headings")
+tree = ttk.Treeview(Tela_Relatorios, columns=("Relatório",), show="headings")
 tree.heading("Relatório", text="Relatórios Gerados")
 tree.pack(expand=True, fill="both", padx=20, pady=10)
 
-tk.Button(root, text="Exportar Relatório", bg="black", fg="white", command=exportar_relatorio).pack(pady=5)
+tk.Button(Tela_Relatorios, text="Exportar Relatório", bg="black", fg="white", command=exportar_relatorio).pack(pady=5)
 
 criar_tabela_manutencao()
 popular_dados_ficticios()
-root.mainloop()
+Tela_Relatorios.mainloop()
