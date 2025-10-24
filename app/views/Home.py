@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-
+from main import root 
 # Funções para cada botão
 def abrir_cadastro_cliente():
     messagebox.showinfo("Ação", "Abrir tela de cadastro de cliente")
@@ -18,13 +18,15 @@ def abrir_notificacoes():
     messagebox.showinfo("Ação", "Abrir notificações preventivas")
 
 # Criando a janela principal
-root = tk.Tk()
-root.title("Drive Tech - Sistema de Manutenção")
-root.geometry("900x600")
-root.configure(bg="#F5F5F5")
+#root = tk.Tk()
+#root.title("Drive Tech - Sistema de Manutenção")
+#root.geometry("900x600")
+#root.configure(bg="#F5F5F5")
+
+tela_home = tk.Frame(root)
 
 # Barra superior
-top_bar = tk.Frame(root, bg="#DDDDDD", height=60)
+top_bar = tk.Frame(tela_home, bg="#DDDDDD", height=60)
 top_bar.pack(side="top", fill="x")
 
 logo = tk.Label(top_bar, text="DRIVE TECH", font=("Arial Black", 20), bg="#DDDDDD")
@@ -34,7 +36,7 @@ usuario = tk.Label(top_bar, text="Olá, Fulano 👤", font=("Arial", 12), bg="#D
 usuario.pack(side="right", padx=20)
 
 # Menu lateral
-menu = tk.Frame(root, bg="#2C2C2C", width=200)
+menu = tk.Frame(tela_home, bg="#2C2C2C", width=200)
 menu.pack(side="left", fill="y")
 
 def add_menu_button(text, command):
@@ -53,7 +55,7 @@ add_menu_button("Usuários e Permissões", lambda: None)
 add_menu_button("Backup", lambda: None)
 
 # Área de ações principais
-main_panel = tk.Frame(root, bg="white")
+main_panel = tk.Frame(tela_home, bg="white")
 main_panel.pack(side="right", expand=True, fill="both", padx=10, pady=10)
 
 # Botões principais no painel
@@ -67,4 +69,4 @@ add_main_button("Registrar Manutenção", abrir_registro_manutencao, 1, 0)
 add_main_button("Histórico", abrir_historico, 1, 1)
 add_main_button("Notificações", abrir_notificacoes, 2, 0)
 
-root.mainloop()
+tela_home.mainloop()
