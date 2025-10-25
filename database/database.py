@@ -1,83 +1,71 @@
 import sqlite3
+import os
 
 DB_NAME = "DriveTech.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', DB_NAME)
 
 def conectar():
-    return sqlite3.connect(DB_NAME)
-
-def criar_banco():
-    con = conectar()
-    con.close()
+    """Conecta ao banco de dados SQLite"""
+    return sqlite3.connect(DB_PATH)
 
 def criar_tabelas():
+    """Cria todas as tabelas necessárias no banco de dados"""
     con = conectar()
     cur = con.cursor()
 
-
-    
+    # Tabela CLIENTE
     cur.execute(""" 
-                    CREATE TABLE IF NOT EXISTS cliente(
-<<<<<<< HEAD
-                        cpf_cliente VARCHAR(15) PRIMARY KEY NOT NULL,
-                        nme_cliente VARCHAR(100) NOT NULL,
-=======
-                        nme_cliente VARCHAR(100) NOT NULL,
-                        cpf_cliente VARCHAR(15) PRIMARY KEY NOT NULL,
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
-                        tel_cliente VARCHAR(15) NOT NULL,
-                        email_cliente VARCHAR(50) NOT NULL,
-                        end_cliente VARCHAR(50) NOT NULL
-                    )
-                 """)
+        CREATE TABLE IF NOT EXISTS cliente(
+            cpf_cliente VARCHAR(15) PRIMARY KEY NOT NULL,
+            nme_cliente VARCHAR(100) NOT NULL,
+            tel_cliente VARCHAR(15) NOT NULL,
+            email_cliente VARCHAR(50) NOT NULL,
+            end_cliente VARCHAR(100) NOT NULL
+        )
+    """)
 
+    # Tabela VEICULO
     cur.execute(""" 
-                    CREATE TABLE IF NOT EXISTS veiculo(
-<<<<<<< HEAD
-                        placa_veiculo INT PRIMARY KEY NOT NULL,
-                        marc_veiculo VARCHAR(30) NOT NULL,
-                        mode_veiculo VARCHAR (100) NOT NULL,
-                        ano_veiculo DATE NOT NULL,
-=======
-                        id_veiculo INT PRIMARY KEY AUTO_INCREMENT,
-                        marc_veiculo VARCHAR(30) NOT NULL,
-                        mode_veiculo VARCHAR (100) NOT NULL,
-                        ano_veiculo DATE NOT NULL,
-                        placa_veiculo VARCHAR(30) NOT NULL,
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
-                        km_atual_veiculo INT NOT NULL,
-                        cpf_cliente_veiculo VARCHAR, FOREIGN KEY(cpf_cliente_veiculo) REFERENCES cliente(cpf_cliente)
-                    )
-                 """)
-    
-    cur.execute(""" 
-                    CREATE TABLE IF NOT EXISTS manutencao(
-                        id_manutencao INT PRIMARY KEY AUTO_INCREMENT,
-                        veic_manutencao VARCHAR(30) NOT NULL,
-                        serv_manutencao VARCHAR (100) NOT NULL,
-                        dta_manuntencao DATE NOT NULL,
-                        pecs_manutencao VARCHAR(30)
-<<<<<<< HEAD
-                        placa_veiculo_manutencao VARCHAR, FOREIGN KEY(placa_veiculo_manutencao) REFERENCES veiculo(placa_veiculo)
-=======
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
-                    )
-                 """)
-    
-    cur.execute(""" 
-                    CREATE TABLE IF NOT EXISTS relatorio(
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        nome VARCHAR(100) NOT NULL,
-                        turma_id INT,
-                        FOREIGN KEY(turma_id) REFERENCES turmas(id)
-                    )
-                 """)
-    
-    #adicionar outras tabelas pendentes ainda acima, e configurar as que ja estão descritas
+        CREATE TABLE IF NOT EXISTS veiculo(
+            id_veiculo INTEGER PRIMARY KEY AUTOINCREMENT,
+            placa_veiculo VARCHAR(10) NOT NULL UNIQUE,
+            marc_veiculo VARCHAR(30) NOT NULL,
+            mode_veiculo VARCHAR(100) NOT NULL,
+            ano_veiculo INTEGER NOT NULL,
+            km_atual_veiculo INTEGER NOT NULL,
+            cpf_cliente_veiculo VARCHAR(15),
+            FOREIGN KEY(cpf_cliente_veiculo) REFERENCES cliente(cpf_cliente)
+        )
+    """)
 
+    # Tabela MANUTENCAO
+    cur.execute(""" 
+        CREATE TABLE IF NOT EXISTS manutencao(
+            id_manutencao INTEGER PRIMARY KEY AUTOINCREMENT,
+            veic_manutencao VARCHAR(30) NOT NULL,
+            serv_manutencao VARCHAR(100) NOT NULL,
+            dta_manutencao DATE NOT NULL,
+            pecs_manutencao VARCHAR(200),
+            placa_veiculo_manutencao VARCHAR(10),
+            FOREIGN KEY(placa_veiculo_manutencao) REFERENCES veiculo(placa_veiculo)
+        )
+    """)
 
-    con.commit() #salva(confirmar) as alterações no banco
-<<<<<<< HEAD
-    con.close() #fechar a conexão com o banco
-=======
-    con.close() #fechar a conexão com o banco
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
+    # Tabela USUARIOS
+    cur.execute(""" 
+        CREATE TABLE IF NOT EXISTS usuarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome VARCHAR(100) NOT NULL,
+            email VARCHAR(50) UNIQUE NOT NULL,
+            senha VARCHAR(50) NOT NULL,
+            nivel VARCHAR(20) DEFAULT 'usuario'
+        )
+    """)
+
+    con.commit()
+    con.close()
+    print("✅ Tabelas criadas com sucesso!")
+
+# Criar tabelas automaticamente
+if __name__ == "__main__":
+    criar_tabelas()

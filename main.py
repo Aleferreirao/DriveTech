@@ -1,95 +1,158 @@
 import tkinter as tk
 from tkinter import messagebox
-import re
+from database.database import criar_tabelas
+from views.cadastro_frame import CadastroFrame
+from views.manutencao_frame import ManutencaoFrame
+from views.consulta_frame import ConsultaFrame
 
-# Dados simulados da oficina
-USUARIO_EMAIL = "oficina@drivetech.com"
-USUARIO_SENHA = "admin123"
+class HomeApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Drive Tech - Sistema de Manutenção")
+        self.root.geometry("1000x700")
+        self.root.configure(bg="#F5F5F5")
+        
+        # Garantir que as tabelas existem
+        try:
+            criar_tabelas()
+            print("✅ Sistema inicializado com sucesso!")
+        except Exception as e:
+            print(f"⚠️ Aviso: {e}")
 
-# Função para validar email
-def email_valido(email):
-    padrao = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-    return re.match(padrao, email)
+        # Barra superior
+        top_bar = tk.Frame(root, bg="#1E88E5", height=70)
+        top_bar.pack(side="top", fill="x")
+        top_bar.pack_propagate(False)
 
-# Função de login
-def fazer_login():
-    email = email_entry.get()
-    senha = senha_entry.get()
+        logo = tk.Label(top_bar, text="DRIVE TECH", font=("Arial Black", 22), 
+                       bg="#1E88E5", fg="white")
+        logo.pack(side="left", padx=25, pady=15)
 
-    if not email_valido(email):
-        msg_erro.config(text="Digite um e-mail válido", fg="red")
-        return
+        usuario = tk.Label(top_bar, text="Olá, Usuário 👤", font=("Arial", 12), 
+                          bg="#1E88E5", fg="white")
+        usuario.pack(side="right", padx=25, pady=15)
 
-    if email == USUARIO_EMAIL and senha == USUARIO_SENHA:
-        messagebox.showinfo("Login", "Login realizado com sucesso!")
-        root.destroy()
-    else:
-        messagebox.showerror("Erro", "Email ou senha incorretos")
+        # Container principal
+        main_container = tk.Frame(root, bg="#F5F5F5")
+        main_container.pack(fill="both", expand=True)
 
-# Mostrar/esconder senha
-def toggle_senha():
-    if senha_entry.cget('show') == '':
-        senha_entry.config(show='*')
-        show_btn.config(text='Show')
-    else:
-        senha_entry.config(show='')
-        show_btn.config(text='Hide')
+        # Menu lateral
+        menu = tk.Frame(main_container, bg="#2C2C2C", width=220)
+        menu.pack(side="left", fill="y")
+        menu.pack_propagate(False)
 
-# Janela principal
-root = tk.Tk()
-root.title("Login - Drive Tech")
-root.geometry("800x500")
-root.configure(bg="#e6e6e6")  # cinza mais claro
+        # Área principal
+        self.main_panel = tk.Frame(main_container, bg="white")
+        self.main_panel.pack(side="right", expand=True, fill="both", padx=10, pady=10)
 
-# Container principal
-container = tk.Frame(root, bg="#e6e6e6")
-container.pack(expand=True)
+        # Botões do menu
+        self.criar_botoes_menu(menu)
 
-# Mensagem de boas-vindas
-welcome = tk.Label(container, text="Seja Bem-Vindo(a)!", font=("Helvetica", 20, "bold"), bg="#e6e6e6", fg="#333")
-welcome.pack(pady=10)
+        # Tela inicial
+        self.mostrar_inicio()
 
-# Logo
-try:
-    root.logo_img = tk.PhotoImage(file="DriveTech/views/logo.png")
-    root.logo_img = root.logo_img.subsample(4, 4)  
-    logo_label = tk.Label(container, image=root.logo_img, bg="#e6e6e6")
-    logo_label.pack(pady=10)
-except:
-    logo_label = tk.Label(container, text="DRIVE TECH", font=("Arial Black", 24), bg="#e6e6e6", fg="#222")
-    logo_label.pack(pady=10)
+    def criar_botoes_menu(self, menu):
+        def add_menu_button(text, command):
+            btn = tk.Button(menu, text=text, command=command,
+                          fg="white", bg="#2C2C2C", anchor="w", 
+                          padx=20, pady=12, font=("Arial", 11),
+                          relief="flat", bd=0, width=18)
+            btn.pack(fill="x", pady=1)
+            
+            def on_enter(e):
+                btn.config(bg="#37474F")
+            def on_leave(e):
+                btn.config(bg="#2C2C2C")
+            
+            btn.bind("<Enter>", on_enter)
+            btn.bind("<Leave>", on_leave)
 
-# Frame do login (caixa central)
-frame = tk.Frame(container, bg="#2c2c2c", padx=20, pady=20, bd=0, relief="flat")
-frame.pack(pady=20)
+        # Título do menu
+        tk.Label(menu, text="MENU", font=("Arial Black", 12), 
+                bg="#2C2C2C", fg="white", pady=15).pack(fill="x")
 
-# Campo de email
-tk.Label(frame, text="Email", fg="white", bg="#2c2c2c", font=("Helvetica", 10)).grid(row=0, column=0, sticky="w")
-email_entry = tk.Entry(frame, width=30, font=("Helvetica", 10))
-email_entry.grid(row=1, column=0, columnspan=1, pady=(0,10))
-email_entry.insert(0, "your@email.com")
+        add_menu_button("🏠 Início", self.mostrar_inicio)
+        add_menu_button("👥 Cadastrar Cliente/Veículo", self.abrir_cadastro)
+        add_menu_button("🔧 Registrar Manutenção", self.abrir_manutencao)
+        add_menu_button("📋 Consultar Clientes", lambda: self.abrir_consulta("clientes"))
+        add_menu_button("🚗 Consultar Veículos", lambda: self.abrir_consulta("veiculos"))
+        add_menu_button("📊 Consultar Manutenções", lambda: self.abrir_consulta("manutencoes"))
+        add_menu_button("❌ Sair", self.sair)
 
-# Mensagem de erro
-msg_erro = tk.Label(frame, text="", bg="#2c2c2c", fg="red", font=("Helvetica", 9))
-msg_erro.grid(row=2, column=0, columnspan=2, sticky="w")
+    def limpar_main_panel(self):
+        for widget in self.main_panel.winfo_children():
+            widget.destroy()
 
-# Campo de senha
-tk.Label(frame, text="Password", fg="white", bg="#2c2c2c", font=("Helvetica", 10)).grid(row=3, column=0, sticky="w")
-senha_entry = tk.Entry(frame, width=30, show='*', font=("Helvetica", 10))
-senha_entry.grid(row=4, column=0, pady=(0,10))
+    def mostrar_inicio(self):
+        self.limpar_main_panel()
+        
+        # Banner de boas-vindas
+        welcome_frame = tk.Frame(self.main_panel, bg="white")
+        welcome_frame.pack(expand=True, fill="both")
+        
+        tk.Label(welcome_frame, text="Bem-vindo ao Drive Tech!", 
+                font=("Arial Black", 28), bg="white", fg="#1E88E5").pack(pady=30)
+        
+        tk.Label(welcome_frame, text="Sistema de Gerenciamento de Manutenção Veicular", 
+                font=("Arial", 16), bg="white", fg="#666666").pack(pady=10)
+        
+        # Estatísticas
+        stats_frame = tk.Frame(welcome_frame, bg="white")
+        stats_frame.pack(pady=50)
+        
+        try:
+            from models.models import Cliente, Veiculo, Manutencao
+            total_clientes = len(Cliente.listar())
+            total_veiculos = len(Veiculo.listar())
+            total_manutencoes = len(Manutencao.listar())
+            
+            stats = [
+                f"📊 Total de Clientes: {total_clientes}",
+                f"🚗 Total de Veículos: {total_veiculos}", 
+                f"🔧 Total de Manutenções: {total_manutencoes}"
+            ]
+            
+            for stat in stats:
+                tk.Label(stats_frame, text=stat, font=("Arial", 14), 
+                        bg="white", fg="#333333").pack(pady=8)
+                        
+        except Exception as e:
+            tk.Label(stats_frame, text="📊 Carregando estatísticas...", 
+                    font=("Arial", 14), bg="white", fg="#333333").pack(pady=8)
 
-# Botão mostrar senha
-show_btn = tk.Button(frame, text="Show", command=toggle_senha, width=6, font=("Helvetica", 9))
-show_btn.grid(row=4, column=1, padx=5)
+    def abrir_cadastro(self):
+        self.limpar_main_panel()
+        try:
+            frame = CadastroFrame(self.main_panel)
+            frame.pack(expand=True, fill="both", padx=10, pady=10)
+        except Exception as e:
+            messagebox.showerror("Erro", f"❌ Erro ao abrir cadastro: {e}")
 
-# Linha de botões
-btn_frame = tk.Frame(frame, bg="#2c2c2c")
-btn_frame.grid(row=5, column=0, columnspan=2, pady=10)
+    def abrir_manutencao(self):
+        self.limpar_main_panel()
+        try:
+            frame = ManutencaoFrame(self.main_panel)
+            frame.pack(expand=True, fill="both", padx=10, pady=10)
+        except Exception as e:
+            messagebox.showerror("Erro", f"❌ Erro ao abrir manutenção: {e}")
 
-btn_cancelar = tk.Button(btn_frame, text="Cancel", command=root.destroy, bg="white", width=12, font=("Helvetica", 10))
-btn_cancelar.pack(side="left", padx=5)
+    def abrir_consulta(self, tipo):
+        self.limpar_main_panel()
+        try:
+            frame = ConsultaFrame(self.main_panel, tipo)
+            frame.pack(expand=True, fill="both", padx=10, pady=10)
+        except Exception as e:
+            messagebox.showerror("Erro", f"❌ Erro ao abrir consulta: {e}")
 
-btn_login = tk.Button(btn_frame, text="Login", command=fazer_login, bg="black", fg="white", width=12, font=("Helvetica", 10))
-btn_login.pack(side="left", padx=5)
+    def sair(self):
+        if messagebox.askokcancel("Sair", "Deseja realmente sair do sistema?"):
+            self.root.quit()
 
-root.mainloop()
+if __name__ == "__main__":
+    try:
+        root = tk.Tk()
+        app = HomeApp(root)
+        root.mainloop()
+    except Exception as e:
+        print(f"❌ Erro na execução: {e}")
+        messagebox.showerror("Erro Fatal", f"O aplicativo encontrou um erro:\n{e}")

@@ -1,29 +1,31 @@
-# models.py
 import sqlite3
 from database.database import conectar
-# Classe base: Cliente
-<<<<<<< HEAD
-class Pessoa:
-=======
-class Cliente:
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
-    def __init__(self, nome, cpf=None, telefone=None, email=None, endereço=None):
-        self.nome = nome
-        self.cpf = cpf
-        self.telefone = telefone
-        self.email = email
-        self.endereço = endereço
 
+class Cliente:
+    def __init__(self, cpf_cliente, nme_cliente, tel_cliente, email_cliente, end_cliente):
+        self.cpf_cliente = cpf_cliente
+        self.nme_cliente = nme_cliente
+        self.tel_cliente = tel_cliente
+        self.email_cliente = email_cliente
+        self.end_cliente = end_cliente
 
     def adicionar(self):
-        con = conectar()
-        cur = con.cursor()
-        cur.execute(
-            "INSERT INTO cliente (nome,cpf, telefone, email, endereço) VALUES (?, ?, ?, ?, ?)",
-            (self.nome,self.cpf, self.telefone, self.email, self.endereço)
-        )
-        con.commit()
-        con.close()
+        try:
+            con = conectar()
+            cur = con.cursor()
+            cur.execute(
+                "INSERT INTO cliente (cpf_cliente, nme_cliente, tel_cliente, email_cliente, end_cliente) VALUES (?, ?, ?, ?, ?)",
+                (self.cpf_cliente, self.nme_cliente, self.tel_cliente, self.email_cliente, self.end_cliente)
+            )
+            con.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        except Exception as e:
+            print(f"❌ Erro ao adicionar cliente: {e}")
+            return False
+        finally:
+            con.close()
 
     @staticmethod
     def listar():
@@ -35,118 +37,105 @@ class Cliente:
         return dados
 
     @staticmethod
-    def atualizar(cpf_cliente, nome=None, telefone=None, email=None, endereço=None):
+    def buscar_por_cpf(cpf_cliente):
         con = conectar()
         cur = con.cursor()
-        if nome:
-            cur.execute("UPDATE cliente SET nome=? WHERE id=?", (nome, cpf_cliente))
-        if telefone:
-            cur.execute("UPDATE cliente SET telefone=? WHERE id=?", (telefone, cpf_cliente))
-        if email:
-            cur.execute("UPDATE cliente SET email=? WHERE id=?", (email, cpf_cliente))
-        if endereço:
-            cur.execute("UPDATE cliente SET endereço=? WHERE id=?", (endereço, cpf_cliente))
-        con.commit()
+        cur.execute("SELECT * FROM cliente WHERE cpf_cliente = ?", (cpf_cliente,))
+        cliente = cur.fetchone()
         con.close()
+        return cliente
 
-    @staticmethod
-    def deletar(cpf_cliente):
-        con = conectar()
-        cur = con.cursor()
-        cur.execute("DELETE FROM cliente WHERE id=?", (cpf_cliente,))
-        con.commit()
-        con.close()
-
-# Classe: Veiculo
 class Veiculo:
-    def __init__(self, cpf_cliente, marca, modelo, ano, placa, km_atual=0):
-        self.cpf_cliente = cpf_cliente
-        self.marca = marca
-        self.modelo = modelo
-        self.ano = ano
-        self.placa = placa
-        self.km_atual = km_atual
+    def __init__(self, placa_veiculo, marc_veiculo, mode_veiculo, ano_veiculo, km_atual_veiculo, cpf_cliente_veiculo):
+        self.placa_veiculo = placa_veiculo
+        self.marc_veiculo = marc_veiculo
+        self.mode_veiculo = mode_veiculo
+        self.ano_veiculo = ano_veiculo
+        self.km_atual_veiculo = km_atual_veiculo
+        self.cpf_cliente_veiculo = cpf_cliente_veiculo
 
     def adicionar(self):
-        con = conectar()
-        cur = con.cursor()
-        cur.execute(
-<<<<<<< HEAD
-            "INSERT INTO veiculo (cpf_cliente, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
-=======
-            "INSERT INTO veiculo (cliente_id, marca, modelo, ano, placa, km_atual) VALUES (?, ?, ?, ?, ?, ?)",
->>>>>>> 017eefd1534559f9460232a890cbe0d4a33d2ae5
-            (self.cpf_cliente, self.marca, self.modelo, self.ano, self.placa, self.km_atual)
-        )
-        con.commit()
-        con.close()
+        try:
+            con = conectar()
+            cur = con.cursor()
+            cur.execute(
+                "INSERT INTO veiculo (placa_veiculo, marc_veiculo, mode_veiculo, ano_veiculo, km_atual_veiculo, cpf_cliente_veiculo) VALUES (?, ?, ?, ?, ?, ?)",
+                (self.placa_veiculo, self.marc_veiculo, self.mode_veiculo, self.ano_veiculo, self.km_atual_veiculo, self.cpf_cliente_veiculo)
+            )
+            con.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+        except Exception as e:
+            print(f"❌ Erro ao adicionar veículo: {e}")
+            return False
+        finally:
+            con.close()
 
     @staticmethod
     def listar():
         con = conectar()
         cur = con.cursor()
-        cur.execute("SELECT * FROM veiculo")
+        cur.execute("""
+            SELECT v.*, c.nme_cliente 
+            FROM veiculo v 
+            LEFT JOIN cliente c ON v.cpf_cliente_veiculo = c.cpf_cliente
+        """)
         dados = cur.fetchall()
         con.close()
         return dados
 
-# Classe: Manutencao
+    @staticmethod
+    def buscar_por_cliente(cpf_cliente):
+        con = conectar()
+        cur = con.cursor()
+        cur.execute("SELECT * FROM veiculo WHERE cpf_cliente_veiculo = ?", (cpf_cliente,))
+        veiculos = cur.fetchall()
+        con.close()
+        return veiculos
+
 class Manutencao:
-    def __init__(self, cpf_cliente, descricao, data, km_realizada, km_proxima=None, data_proxima=None):
-        self.cpf_cliente = cpf_cliente
-        self.descricao = descricao
-        self.data = data
-        self.km_realizada = km_realizada
-        self.km_proxima = km_proxima
-        self.data_proxima = data_proxima
+    def __init__(self, veic_manutencao, serv_manutencao, dta_manutencao, pecs_manutencao, placa_veiculo_manutencao):
+        self.veic_manutencao = veic_manutencao
+        self.serv_manutencao = serv_manutencao
+        self.dta_manutencao = dta_manutencao
+        self.pecs_manutencao = pecs_manutencao
+        self.placa_veiculo_manutencao = placa_veiculo_manutencao
 
     def adicionar(self):
-        con = conectar()
-        cur = con.cursor()
-        cur.execute(
-            "INSERT INTO manutencoes (veiculo_id, descricao, data, km_realizada, km_proxima, data_proxima) VALUES (?, ?, ?, ?, ?, ?)",
-            (self.cpf_cliente, self.descricao, self.data, self.km_realizada, self.km_proxima, self.data_proxima)
-        )
-        con.commit()
-        con.close()
+        try:
+            con = conectar()
+            cur = con.cursor()
+            cur.execute(
+                "INSERT INTO manutencao (veic_manutencao, serv_manutencao, dta_manutencao, pecs_manutencao, placa_veiculo_manutencao) VALUES (?, ?, ?, ?, ?)",
+                (self.veic_manutencao, self.serv_manutencao, self.dta_manutencao, self.pecs_manutencao, self.placa_veiculo_manutencao)
+            )
+            con.commit()
+            return True
+        except Exception as e:
+            print(f"❌ Erro ao adicionar manutenção: {e}")
+            return False
+        finally:
+            con.close()
 
     @staticmethod
     def listar():
         con = conectar()
         cur = con.cursor()
-        cur.execute("SELECT * FROM manutencoes")
+        cur.execute("""
+            SELECT m.*, v.marc_veiculo, v.mode_veiculo 
+            FROM manutencao m 
+            LEFT JOIN veiculo v ON m.placa_veiculo_manutencao = v.placa_veiculo
+        """)
         dados = cur.fetchall()
         con.close()
         return dados
-
-
-# Classes de Usuário e Admin
-class Usuario:
-    def __init__(self, nome, email, senha, nivel="usuario"):
-        self.nome = nome
-        self.email = email
-        self.senha = senha
-        self.nivel = nivel
-
-    def adicionar(self):
-        con = conectar()
-        cur = con.cursor()
-        cur.execute(
-            "INSERT INTO usuarios (nome, email, senha, nivel) VALUES (?, ?, ?, ?)",
-            (self.nome, self.email, self.senha, self.nivel)
-        )
-        con.commit()
-        con.close()
 
     @staticmethod
-    def listar():
+    def buscar_por_veiculo(placa_veiculo):
         con = conectar()
         cur = con.cursor()
-        cur.execute("SELECT id, nome, email, nivel FROM usuarios")
-        dados = cur.fetchall()
+        cur.execute("SELECT * FROM manutencao WHERE placa_veiculo_manutencao = ?", (placa_veiculo,))
+        manutencoes = cur.fetchall()
         con.close()
-        return dados
-
-class Administrador(Usuario):
-    def __init__(self, nome, email, senha):
-        super().__init__(nome, email, senha, nivel="admin")
+        return manutencoes
